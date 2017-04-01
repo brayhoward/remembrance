@@ -19,6 +19,9 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
-#Ignore file from vscode history plugin
+# Vscode history plugin file
 .history/
+
+# Binary executable created when you run `mix escript.build`
+remembrance
 
