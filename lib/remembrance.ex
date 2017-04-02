@@ -11,18 +11,16 @@ defmodule Remembrance do
       iex> Remembrance.main []
       {:ok, "0 hr 3 min 0 sec"}
 
-      iex> Remembrance.main [3]
+      iex> Remembrance.main ["3"]
       {:ok, "0 hr 3 min 0 sec"}
 
-      iex> Remembrance.main [1, 30, 6]
+      iex> Remembrance.main ["1", "30", "6"]
       {:ok, "1 hr 30 min 6 sec"}
 
-      iex> Remembrance.main [0, 5, 30]
+      iex> Remembrance.main ["0", "5", "30"]
       {:ok, "0 hr 5 min 30 sec"}
 
-      // Fucntionaly works but fails when ran as a test.
-      // TODO: debug later.
-      Remembrance.main [1, 3]
+      iex> Remembrance.main ["1", "3"]
       {:ok, "1 hr 3 min 0 sec"}
 
   """
@@ -48,12 +46,13 @@ defmodule Remembrance do
   end
 
   defp parse_args(args) do
+    nums = map_to_int args
 
-    case length args do
+    case length nums do
       0 ->
         IO.puts "No arguments given"
         # Default to 3 min if no args passed
-        parse_args [3]
+        parse_args ["3"]
 
       1 ->
         %{hr: 0, min: List.first(args), sec: 0}
@@ -62,11 +61,41 @@ defmodule Remembrance do
         [ hr | min ] = args
         %{hr: hr, min: min, sec: 0}
 
+      # Take top three args and ignore any others.
       _ ->
         [hr | tail] = args
         [min | tail] = tail
         [sec | _] = tail
         %{hr: hr, min: min, sec: sec}
     end
+  end
+
+  defp map_to_int(args) do
+    Enum.map args, &(to_int &1)
+  end
+
+  defp to_int(arg) do
+    case Integer.parse arg do
+      {num, _} -> num
+
+      :error ->
+        exit_gracfully()
+    end
+  end
+
+  defp offer_feedback() do
+    IO.puts """
+
+      ERROR
+      Only Pass whole numbers as arguments
+      Example: `./remembrance 1 30`
+
+      "Timer set for 1 hr 30 min 0 sec"
+      """
+  end
+
+  defp exit_gracfully do
+    offer_feedback()
+    exit(:shutdown)
   end
 end
