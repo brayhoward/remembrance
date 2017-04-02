@@ -30,20 +30,43 @@ defmodule Remembrance do
     |> process
   end
 
+  def alert_time_elapsed(), do: put_alert_message()
   #
   ## Private AF
   #
 
-  defp process(%{hr: hr, min: min, sec: sec}) do
-    time = "#{hr} hr #{min} min #{sec} sec";
-    IO.puts "Timer set for #{time}\n"
+  defp process(time_map) do
+    case set_timer(time_map) do
+      {:ok, time_map} ->
+        print_confirmation(time_map)
 
-    if min === 3 && hr === 0 && sec === 0 do
-      IO.puts "Don't oversteep that tea! 🍵"
+      error ->
+        offer_feedback()
+        error
     end
-
-    {:ok, time}
   end
+
+  defp set_timer(time_map) do
+    %{hr: hr, min: min, sec: sec} = time_map
+
+    milliseconds = :timer.hms hr, min, sec
+
+    case :timer.apply_after(milliseconds, Remembrance, :alert_time_elapsed, []) do
+      {:ok, _} -> {:ok, time_map}
+
+      error -> error
+    end
+  end
+
+  defp put_alert_message() do
+
+    IO.puts """
+      Ding Ding ⏰
+      Your requested time has elapsed.
+    """
+  end
+
+  defp humanize_time_map(%{hr: hr, min: min, sec: sec}), do: "#{hr} hr #{min} min #{sec} sec"
 
   defp parse_args(args) do
     nums = map_to_int args
@@ -55,15 +78,15 @@ defmodule Remembrance do
         parse_args ["3"]
 
       1 ->
-        %{hr: 0, min: List.first(args), sec: 0}
+        %{hr: 0, min: List.first(nums), sec: 0}
 
       2 ->
-        [ hr | min ] = args
-        %{hr: hr, min: min, sec: 0}
+        [ hr | tail ] = nums
+        %{hr: hr, min: List.first(tail), sec: 0}
 
       # Take top three args and ignore any others.
       _ ->
-        [hr | tail] = args
+        [hr | tail] = nums
         [min | tail] = tail
         [sec | _] = tail
         %{hr: hr, min: min, sec: sec}
@@ -97,5 +120,17 @@ defmodule Remembrance do
   defp exit_gracfully do
     offer_feedback()
     exit(:shutdown)
+  end
+
+  defp print_confirmation(time_map) do
+    %{hr: hr, min: min, sec: sec} = time_map
+    time = humanize_time_map(time_map)
+    IO.puts "Timer set for #{time}\n"
+
+    if min === 3 && hr === 0 && sec === 0 do
+      IO.puts "Don't oversteep that tea! 🍵"
+    end
+
+    {:ok, time}
   end
 end
