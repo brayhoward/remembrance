@@ -8,19 +8,22 @@ defmodule Remembrance do
 
   ## Examples
 
-      iex> Remembrance.main []
+      iex> Remembrance.main ["0", "0", "4"]
+      {:ok, "0 hr 0 min 4 sec"}
+
+      Remembrance.main []
       {:ok, "0 hr 3 min 0 sec"}
 
-      iex> Remembrance.main ["3"]
+      Remembrance.main ["3"]
       {:ok, "0 hr 3 min 0 sec"}
 
-      iex> Remembrance.main ["1", "30", "6"]
-      {:ok, "1 hr 30 min 6 sec"}
+      Remembrance.main ["1", "3", "6"]
+      {:ok, "1 hr 3 min 6 sec"}
 
-      iex> Remembrance.main ["0", "5", "30"]
+      Remembrance.main ["0", "5", "30"]
       {:ok, "0 hr 5 min 30 sec"}
 
-      iex> Remembrance.main ["1", "3"]
+      Remembrance.main ["1", "3"]
       {:ok, "1 hr 3 min 0 sec"}
 
   """
@@ -30,39 +33,27 @@ defmodule Remembrance do
     |> process
   end
 
-  def alert_time_elapsed(), do: put_alert_message()
   #
   ## Private AF
   #
 
   defp process(time_map) do
-    case set_timer(time_map) do
-      {:ok, time_map} ->
-        print_confirmation(time_map)
-
-      error ->
-        offer_feedback()
-        error
-    end
-  end
-
-  defp set_timer(time_map) do
     %{hr: hr, min: min, sec: sec} = time_map
-
     milliseconds = :timer.hms hr, min, sec
+    print_confirmation(time_map)
 
-    case :timer.apply_after(milliseconds, Remembrance, :alert_time_elapsed, []) do
-      {:ok, _} -> {:ok, time_map}
+    :timer.sleep(milliseconds)
+    print_alert_message(time_map)
 
-      error -> error
-    end
+    {:ok, humanize_time_map(time_map)}
   end
 
-  defp put_alert_message() do
+  defp print_alert_message(time_map) do
+    time = humanize_time_map(time_map)
 
     IO.puts """
       Ding Ding ⏰
-      Your requested time has elapsed.
+      Your requested time of #{time} has elapsed.
     """
   end
 
