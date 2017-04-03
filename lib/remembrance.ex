@@ -35,7 +35,9 @@ defmodule Remembrance do
   """
   def main(args) do
     case parse_args(args) do
-      :error -> IO.puts "Print help docs"
+      :error ->
+        print_help_docs()
+        {:ok, :help_docs}
 
       {:ok, time_map} ->
         time_map
@@ -151,14 +153,45 @@ defmodule Remembrance do
     {:ok, time}
   end
 
-  defp offer_feedback() do
+  defp print_help_docs() do
     IO.puts """
 
-      ERROR
-      Only Pass whole numbers as arguments
-      Example: `./remembrance 1 30`
+      To set time pass whole numbers as arguments.
+      First argument being the hours, second the minutes, and third the seconds.
 
+      Example: `./remembrance 1 30 0`
       "Timer set for 1 hr 30 min 0 sec"
+
+
+      If no arguments are passed the timer will default 3 minutes.
+
+      Example: `./remembrance`
+      "Timer set for 0 hr 3 min 0 sec"
+
+
+      If only one argument is passed it timer will set for minutes.
+
+      Example: `./remembrance 5`
+      "Timer set for 0 hr 5 min 0 sec"
+
+
+      If two arguments are passed the timer will set for hours and minutes
+
+      Example: `./remembrance 1 30`
+      "Timer set for 1 hr 30 min 0 sec"
+
+
+      To set hours minutes and seconds pass three arguments.
+
+      Example: `./remembrance 1 25 30`
+      "Timer set for 1 hr 25 min 30 sec"
+
+
+      Pass 0 for any time units that you do not want to set.
+
+      Example: `./remembrance 0 0 45`
+      "Timer set for 0 hr 0 min 45 sec"
+
       """
   end
 end
