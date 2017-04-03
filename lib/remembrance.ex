@@ -9,22 +9,22 @@ defmodule Remembrance do
   ## Examples
 
       iex> Remembrance.main ["0", "0", "4"]
-      {:ok, "0 hr 0 min 4 sec"}
+      {:ok, "0 hours 0 minutes 4 seconds"}
 
       Remembrance.main []
-      {:ok, "0 hr 3 min 0 sec"}
+      {:ok, "0 hours 3 minutes 0 seconds"}
 
       Remembrance.main ["3"]
-      {:ok, "0 hr 3 min 0 sec"}
+      {:ok, "0 hours 3 minutes 0 seconds"}
 
       Remembrance.main ["1", "3", "6"]
-      {:ok, "1 hr 3 min 6 sec"}
+      {:ok, "1 hours 3 minutes 6 seconds"}
 
       Remembrance.main ["0", "5", "30"]
-      {:ok, "0 hr 5 min 30 sec"}
+      {:ok, "0 hours 5 minutes 30 seondsc"}
 
       Remembrance.main ["1", "3"]
-      {:ok, "1 hr 3 min 0 sec"}
+      {:ok, "1 hours 3 minutes 0 seconds"}
 
   """
   def main(args) do
@@ -40,24 +40,19 @@ defmodule Remembrance do
   defp process(time_map) do
     %{hr: hr, min: min, sec: sec} = time_map
     milliseconds = :timer.hms hr, min, sec
-    print_confirmation(time_map)
+    print_timer_set_confirmation(time_map)
 
     :timer.sleep(milliseconds)
-    print_alert_message(time_map)
+    indicate_time_elapsed(time_map)
 
     {:ok, humanize_time_map(time_map)}
   end
 
-  defp print_alert_message(time_map) do
-    time = humanize_time_map(time_map)
-
-    IO.puts """
-      Ding Ding ⏰
-      Your requested time of #{time} has elapsed.
-    """
+  defp indicate_time_elapsed(time_map) do
+    print_alert_message(time_map)
+    System.cmd "printf", ["\a"]
+    System.cmd "say", [timer_elapsed_message(time_map)]
   end
-
-  defp humanize_time_map(%{hr: hr, min: min, sec: sec}), do: "#{hr} hr #{min} min #{sec} sec"
 
   defp parse_args(args) do
     nums = map_to_int args
@@ -97,23 +92,27 @@ defmodule Remembrance do
     end
   end
 
-  defp offer_feedback() do
-    IO.puts """
-
-      ERROR
-      Only Pass whole numbers as arguments
-      Example: `./remembrance 1 30`
-
-      "Timer set for 1 hr 30 min 0 sec"
-      """
-  end
-
   defp exit_gracfully do
     offer_feedback()
     exit(:shutdown)
   end
 
-  defp print_confirmation(time_map) do
+  ### User messaging funcitons bellow ###
+
+  defp humanize_time_map(%{hr: hr, min: min, sec: sec}), do: "#{hr} hours #{min} minutes #{sec} seconds"
+
+  defp print_alert_message(time_map) do
+    IO.puts """
+      Ding Ding ⏰
+      #{timer_elapsed_message(time_map)}
+    """
+  end
+
+  defp timer_elapsed_message(time_map) do
+    "Your timer set for #{humanize_time_map(time_map)} has elapsed."
+  end
+
+  defp print_timer_set_confirmation(time_map) do
     %{hr: hr, min: min, sec: sec} = time_map
     time = humanize_time_map(time_map)
     IO.puts "Timer set for #{time}\n"
@@ -123,5 +122,16 @@ defmodule Remembrance do
     end
 
     {:ok, time}
+  end
+
+  defp offer_feedback() do
+    IO.puts """
+
+      ERROR
+      Only Pass whole numbers as arguments
+      Example: `./remembrance 1 30`
+
+      "Timer set for 1 hr 30 min 0 sec"
+      """
   end
 end
