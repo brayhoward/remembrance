@@ -11,6 +11,12 @@ defmodule Remembrance do
       iex> Remembrance.main ["0", "0", "4"]
       {:ok, "0 hours 0 minutes 4 seconds"}
 
+      iex> Remembrance.main ["-h"]
+      {:ok, :help_docs}
+
+      iex> Remembrance.main ["0", "foo", "4"]
+      {:ok, :help_docs}
+
       Remembrance.main []
       {:ok, "0 hours 3 minutes 0 seconds"}
 
