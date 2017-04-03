@@ -55,15 +55,16 @@ defmodule Remembrance do
     {:ok, humanize_time_map(time_map)}
   end
 
+  defp parse_args([]) do
+    IO.puts "No arguments given"
+    # Default to 3 if no args passed
+    parse_args(["3"])
+  end
+
   defp parse_args(args) do
     nums = map_to_int args
 
     case length nums do
-      0 ->
-        IO.puts "No arguments given"
-        # Default to 3 min if no args passed
-        parse_args ["3"]
-
       1 ->
         %{hr: 0, min: List.first(nums), sec: 0}
 
