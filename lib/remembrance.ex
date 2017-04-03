@@ -63,8 +63,17 @@ defmodule Remembrance do
     case List.first(args) === "-h" do
       true -> :error
 
-      false ->
-        {:ok, map_to_ints(args) |> build_time_map()}
+      false -> process_args_list(args)
+    end
+  end
+
+  defp process_args_list(args) do
+    nums_list = map_to_ints(args)
+
+    case Enum.any?( nums_list, &(:error === &1)) do
+      true -> :error
+
+      false -> {:ok, build_time_map(nums_list)}
     end
   end
 
@@ -100,15 +109,14 @@ defmodule Remembrance do
     case Integer.parse arg do
       {num, _} -> num
 
-      :error ->
-        exit_gracfully()
+      :error -> :error
     end
   end
 
-  defp exit_gracfully do
-    offer_feedback()
-    exit(:shutdown)
-  end
+  # defp exit_gracfully do
+  #   offer_feedback()
+  #   exit(:shutdown)
+  # end
 
   ### User messaging funcitons bellow ###
 
