@@ -28,10 +28,14 @@ defmodule Remembrance do
 
   """
   def main(args) do
-    args
-    |> parse_args
-    |> set_timeout
-    |> indicate_time_elapsed
+    case parse_args(args) do
+      :error -> IO.puts "Print help docs"
+
+      {:ok, time_map} ->
+        time_map
+        |> set_timeout
+        |> indicate_time_elapsed
+    end
   end
 
   #
@@ -55,15 +59,22 @@ defmodule Remembrance do
     {:ok, humanize_time_map(time_map)}
   end
 
-  defp parse_args([]) do
-    IO.puts "No arguments given"
-    # Default to 3 if no args passed
-    parse_args(["3"])
+  defp parse_args(args) do
+    case List.first(args) === "-h" do
+      true -> :error
+
+      false ->
+        {:ok, map_to_ints(args) |> build_time_map()}
+    end
   end
 
-  defp parse_args(args) do
-    nums = map_to_int args
+  defp build_time_map([]) do
+    IO.puts "No arguments given"
+    # Default to 3 if no args passed
+    build_time_map([3])
+  end
 
+  defp build_time_map(nums) do
     case length nums do
       1 ->
         %{hr: 0, min: List.first(nums), sec: 0}
@@ -81,7 +92,7 @@ defmodule Remembrance do
     end
   end
 
-  defp map_to_int(args) do
+  defp map_to_ints(args) do
     Enum.map args, &(to_int &1)
   end
 
