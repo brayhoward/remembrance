@@ -49,7 +49,7 @@ defmodule Remembrance do
 
   defp indicate_time_elapsed(time_map) do
     print_alert_message(time_map)
-    System.cmd "printf", ["\a"]
+    System.cmd "tput", ["\a"]
     System.cmd "say", [timer_elapsed_message(time_map)]
 
     {:ok, humanize_time_map(time_map)}
