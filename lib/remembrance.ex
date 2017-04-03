@@ -30,28 +30,29 @@ defmodule Remembrance do
   def main(args) do
     args
     |> parse_args
-    |> process
+    |> set_timeout
+    |> indicate_time_elapsed
   end
 
   #
   ## Private AF
   #
 
-  defp process(time_map) do
+  defp set_timeout(time_map) do
     %{hr: hr, min: min, sec: sec} = time_map
     milliseconds = :timer.hms hr, min, sec
     print_timer_set_confirmation(time_map)
-
     :timer.sleep(milliseconds)
-    indicate_time_elapsed(time_map)
 
-    {:ok, humanize_time_map(time_map)}
+    time_map
   end
 
   defp indicate_time_elapsed(time_map) do
     print_alert_message(time_map)
     System.cmd "printf", ["\a"]
     System.cmd "say", [timer_elapsed_message(time_map)]
+
+    {:ok, humanize_time_map(time_map)}
   end
 
   defp parse_args(args) do
